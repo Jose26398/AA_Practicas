@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 TRABAJO 2
-Nombre Estudiante: Jose Maria Sanchez Guerrero
+Nombre Estudiante: Jose Maria Sanchez Guerreroo
 """
 
 import numpy as np
