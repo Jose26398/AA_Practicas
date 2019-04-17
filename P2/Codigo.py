@@ -139,7 +139,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 ###############################################################################
 ###############################################################################
 
-# EJERCICIO 1.3: Supongamos ahora que las siguientes funciones definen la frontera de clasificación de los puntos de la muestra en lugar de una recta
+# EJERCICIO 1.3: Supongamos ahora que las siguientes funciones definen la frontera
+# de clasificación de los puntos de la muestra en lugar de una recta
 
 def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y axis'):
     # Preparar datos
@@ -177,9 +178,25 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
     plt.show()
 
 
-# CODIGO DEL ESTUDIANTE
+def f1(grid):
+    return (grid[:,0]-10)**2+(grid[:,1]-20)**2-400
 
-input("\n--- Pulsar tecla para continuar ---\n")
+def f2(grid):
+    return 0.5*(grid[:,0]+10)**2+(grid[:,1]-20)**2-400
+
+def f3(grid):
+    return 0.5*(grid[:,0]-10)**2-(grid[:,1]+20)**2-400
+
+def f4(grid):
+    return grid[:,1]-20*grid[:,0]**2-5*grid[:,0]+3
+
+plot_datos_cuad(x, ruido, f1)
+plot_datos_cuad(x, ruido, f2)
+plot_datos_cuad(x, ruido, f3)
+plot_datos_cuad(x, ruido, f4)
+
+
+input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 
 
 ###############################################################################
