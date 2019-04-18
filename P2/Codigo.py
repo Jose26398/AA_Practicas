@@ -132,7 +132,7 @@ plt.scatter(x[:, 0], x[:, 1], c=ruido)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
-input("\n--- Pulsar tecla para continuar ---\n")
+# input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
@@ -190,13 +190,13 @@ def f3(grid):
 def f4(grid):
     return grid[:,1]-20*grid[:,0]**2-5*grid[:,0]+3
 
-plot_datos_cuad(x, ruido, f1)
-plot_datos_cuad(x, ruido, f2)
-plot_datos_cuad(x, ruido, f3)
-plot_datos_cuad(x, ruido, f4)
+# plot_datos_cuad(x, ruido, f1)
+# plot_datos_cuad(x, ruido, f2)
+# plot_datos_cuad(x, ruido, f3)
+# plot_datos_cuad(x, ruido, f4)
 
 
-input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
+# input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 
 
 ###############################################################################
@@ -206,18 +206,33 @@ input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 # EJERCICIO 2.1: ALGORITMO PERCEPTRON
 
 def ajusta_PLA(datos, label, max_iter, vini):
-    # CODIGO DEL ESTUDIANTE
+    w = np.array(vini)
+    iter = 0
+    converge = False
+    while not converge:
+        converge = True
+        iter += 1
+        for i in range(datos.shape[0]):
+            prod = np.dot(w, datos[i])
 
-    return x
+            if (prod >= 0 and label[i] < 0) or (prod < 0 and label[i] > 0):
+                w += label[i]*datos[i]
+                converge = False
 
+        if iter >= max_iter:
+            break
 
-# CODIGO DEL ESTUDIANTE
+    return w, iter
+
+x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
+w_0 = np.zeros(x.shape[1])
+w_random = [np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1)]
 
 # Random initializations
 iterations = []
 for i in range(0, 10):
-    # CODIGO DEL ESTUDIANTE
-    print(x)
+    w, iter = ajusta_PLA(x, y, 10000, w_0)
+    iterations.append(iter)
 
 print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
