@@ -6,6 +6,7 @@ Nombre Estudiante: Jose Maria Sanchez Guerrero
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.spatial import distance
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -228,19 +229,35 @@ x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 w_0 = np.zeros(x.shape[1])
 w_random = [np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1)]
 
+w, iter = ajusta_PLA(x, y, 10000, w_0)
+print('Iteraciones necesarias inicializando con vector de ceros: ', iter)
+
 # Random initializations
 iterations = []
 for i in range(0, 10):
-    w, iter = ajusta_PLA(x, y, 10000, w_0)
+    w, iter = ajusta_PLA(x, y, 10000, w_random)
     iterations.append(iter)
 
 print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
-input("\n--- Pulsar tecla para continuar ---\n")
+# input("\n--- Pulsar tecla para continuar ---\n")
+
 
 # Ahora con los datos del ejercicio 1.2.b
 
-# CODIGO DEL ESTUDIANTE
+w_0 = np.zeros(x.shape[1])
+w_random = [np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1)]
+
+w, iter = ajusta_PLA(x, ruido, 10000, w_0)
+print('(Ruido) Iteraciones necesarias inicializando con vector de ceros: ', iter)
+
+# # Random initializations
+# iterations = []
+# for i in range(0, 10):
+#     w, iter = ajusta_PLA(x, ruido, 10000, w_random)
+#     iterations.append(iter)
+#
+# print('(Ruido) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -252,13 +269,47 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
-def sgdRL(x):
-    # CODIGO DEL ESTUDIANTE
+def sgd(x, y, initial_point, eta, maxIter):
+    w = [0.,0.,0.]  # Copiamos en w el punto inicial
+    w = np.array(w)
+    iterations = 1
+
+    # Obtenemos un vector aleatorio de índices de tamaño 64
+    index = np.random.choice(y.size, size=32, replace=False)
+    # Asignamos los valores de los índices de 'x' e 'y' en los minibatches
+    minibatch_x = x[index,:]
+    minibatch_y = y[index]
+
+    # Calculamos el gradiente descendente
+    while True:
+        w_ant = np.copy(w)
+        for x, y in zip(minibatch_x, minibatch_y):
+            w -= eta * logistic(x, y, w)
+        iterations += 1
+
+        if np.linalg.norm(w_ant - w) < 0.01:
+            break
 
     return w
 
+def logistic(x, y, w):
+    Ein = (y*x) / (1 + np.exp(y * w.transpose() * x))
+    Ein = -np.mean(Ein, axis=0)
+    if Ein >= 0.5:
+        return 1
+    else:
+        return -1
 
-# CODIGO DEL ESTUDIANTE
+
+sgdLR_w = sgd(x, y, np.zeros((3,1)), 0.01, 1000)
+print(sgdLR_w)
+sgdLR_x = np.linspace(-50, 50, y.size)
+sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
+
+# Mostramos la gráfica por pantalla y el error
+plt.scatter(x[:,1], x[:,2], c=y)
+plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
+plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -266,7 +317,15 @@ input("\n--- Pulsar tecla para continuar ---\n")
 # usando para ello un número suficientemente grande de nuevas muestras (>999).
 
 
-# CODIGO DEL ESTUDIANTE
+x_test = simula_unif(1000, 2, [-50, 50])
+x_test = np.c_[np.ones((x_test.shape[0], 1), np.float64), x_test]
+
+y_test = []
+for i in range(x_test.shape[0]):
+    y_test.append(f(x_test[i, 0], x_test[i, 1], a, b))
+y_test = np.array(y_test)
+
+print("Eout: ", logistic(x_test, y_test, sgdLR_w))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
