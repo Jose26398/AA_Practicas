@@ -6,7 +6,6 @@ Nombre Estudiante: Jose Maria Sanchez Guerrero
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.spatial import distance
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -133,7 +132,7 @@ plt.scatter(x[:, 0], x[:, 1], c=ruido)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
-# input("\n--- Pulsar tecla para continuar ---\n")
+##input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
@@ -191,13 +190,13 @@ def f3(grid):
 def f4(grid):
     return grid[:,1]-20*grid[:,0]**2-5*grid[:,0]+3
 
-# plot_datos_cuad(x, ruido, f1)
-# plot_datos_cuad(x, ruido, f2)
-# plot_datos_cuad(x, ruido, f3)
-# plot_datos_cuad(x, ruido, f4)
+plot_datos_cuad(x, ruido, f1)
+plot_datos_cuad(x, ruido, f2)
+plot_datos_cuad(x, ruido, f3)
+plot_datos_cuad(x, ruido, f4)
 
 
-# input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
+input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 
 
 ###############################################################################
@@ -225,42 +224,52 @@ def ajusta_PLA(datos, label, max_iter, vini):
 
     return w, iter
 
+
 x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 w_0 = np.zeros(x.shape[1])
-w_random = [np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1)]
-
-w, iter = ajusta_PLA(x, y, 10000, w_0)
-print('Iteraciones necesarias inicializando con vector de ceros: ', iter)
 
 # Random initializations
 iterations = []
 for i in range(0, 10):
-    w, iter = ajusta_PLA(x, y, 10000, w_random)
+    w, iter = ajusta_PLA(x, y, 1000, w_0)
     iterations.append(iter)
 
-print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+print('(Array de ceros) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
-# input("\n--- Pulsar tecla para continuar ---\n")
+
+iterations = []
+for i in range(0, 10):
+    w_random = np.random.uniform(low=-1, high=1, size=3)
+    w, iter = ajusta_PLA(x, y, 1000, w_random)
+    iterations.append(iter)
+
+print('(Array aleatorio) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+
+##input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 # Ahora con los datos del ejercicio 1.2.b
 
-w_0 = np.zeros(x.shape[1])
-w_random = [np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1), np.random.uniform(low=-1, high=1)]
+# Random initializations
+iterations = []
+for i in range(0, 10):
+    w, iter = ajusta_PLA(x, ruido, 1000, w_0)
+    iterations.append(iter)
 
-w, iter = ajusta_PLA(x, ruido, 10000, w_0)
-print('(Ruido) Iteraciones necesarias inicializando con vector de ceros: ', iter)
-
-# # Random initializations
-# iterations = []
-# for i in range(0, 10):
-#     w, iter = ajusta_PLA(x, ruido, 10000, w_random)
-#     iterations.append(iter)
-#
-# print('(Ruido) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+print('(Array de ceros) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
 
-input("\n--- Pulsar tecla para continuar ---\n")
+iterations = []
+for i in range(0, 10):
+    w_random = np.random.uniform(low=-1, high=1, size=3)
+    w, iter = ajusta_PLA(x, ruido, 1000, w_random)
+    iterations.append(iter)
+
+print('(Array aleatorio) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+
+
+##input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
@@ -269,40 +278,50 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
-def sgd(x, y, initial_point, eta, maxIter):
-    w = [0.,0.,0.]  # Copiamos en w el punto inicial
-    w = np.array(w)
-    iterations = 1
-
-    # Obtenemos un vector aleatorio de índices de tamaño 64
-    index = np.random.choice(y.size, size=32, replace=False)
-    # Asignamos los valores de los índices de 'x' e 'y' en los minibatches
-    minibatch_x = x[index,:]
-    minibatch_y = y[index]
+def sgdLR(x, y, initial_point, eta):
+    w = np.copy(initial_point)
 
     # Calculamos el gradiente descendente
     while True:
+        # Obtenemos un vector aleatorio de índices de tamaño 64
+        index = np.random.permutation(x.shape[0])
+        # Asignamos los valores de los índices de 'x' e 'y' en los minibatches
+        minibatch_x = x[index,:]
+        minibatch_y = y[index]
+
         w_ant = np.copy(w)
-        for x, y in zip(minibatch_x, minibatch_y):
-            w -= eta * logistic(x, y, w)
-        iterations += 1
+
+        for xn, yn in zip(minibatch_x, minibatch_y):
+            gradient = sigmoid_clasifier(xn, yn, w)
+            w -= eta * gradient
 
         if np.linalg.norm(w_ant - w) < 0.01:
             break
 
-    return w
+    return w.reshape(-1,)
 
-def logistic(x, y, w):
-    Ein = (y*x) / (1 + np.exp(y * w.transpose() * x))
-    Ein = -np.mean(Ein, axis=0)
-    if Ein >= 0.5:
-        return 1
+
+def sigmoid_clasifier(x, y, w):
+    x = x.reshape(1, 3)
+    z = np.dot(x, w)
+    h = 1 / (1 + np.exp(-z))
+    if h >= 0.5:
+        return np.dot(x.T, 1)
     else:
-        return -1
+        return np.dot(x.T, -1)
 
 
-sgdLR_w = sgd(x, y, np.zeros((3,1)), 0.01, 1000)
-print(sgdLR_w)
+def estimar_Eout(x, y, w):
+    Eout = 0
+    for xn, yn in zip(x,y):
+        xn = xn.reshape(1, 3)
+        z = yn*w.T*xn
+        Eout += np.log(1 + np.exp(-(z)))
+    return -(Eout/y.shape[0])
+
+
+
+sgdLR_w = sgdLR(x, y, np.zeros((3,1)), 0.01)
 sgdLR_x = np.linspace(-50, 50, y.size)
 sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 
@@ -311,7 +330,7 @@ plt.scatter(x[:,1], x[:,2], c=y)
 plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
 plt.show()
 
-input("\n--- Pulsar tecla para continuar ---\n")
+#input("\n--- Pulsar tecla para continuar ---\n")
 
 # Usar la muestra de datos etiquetada para encontrar nuestra solución g y estimar Eout
 # usando para ello un número suficientemente grande de nuevas muestras (>999).
@@ -325,80 +344,12 @@ for i in range(x_test.shape[0]):
     y_test.append(f(x_test[i, 0], x_test[i, 1], a, b))
 y_test = np.array(y_test)
 
-print("Eout: ", logistic(x_test, y_test, sgdLR_w))
+print("Eout: ", estimar_Eout(x_test, y_test, sgdLR_w))
 
 
-input("\n--- Pulsar tecla para continuar ---\n")
+#input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
 ###############################################################################
 ###############################################################################
-# BONUS: Clasificación de Dígitos
-
-
-# Funcion para leer los datos
-def readData(file_x, file_y, digits, labels):
-    # Leemos los ficheros
-    datax = np.load(file_x)
-    datay = np.load(file_y)
-    y = []
-    x = []
-    # Solo guardamos los datos cuya clase sea la digits[0] o la digits[1]
-    for i in range(0, datay.size):
-        if datay[i] == digits[0] or datay[i] == digits[1]:
-            if datay[i] == digits[0]:
-                y.append(labels[0])
-            else:
-                y.append(labels[1])
-            x.append(np.array([1, datax[i][0], datax[i][1]]))
-
-    x = np.array(x, np.float64)
-    y = np.array(y, np.float64)
-
-    return x, y
-
-
-# Lectura de los datos de entrenamiento
-x, y = readData('datos/X_train.npy', 'datos/y_train.npy', [4, 8], [-1, 1])
-# Lectura de los datos para el test
-x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy', [4, 8], [-1, 1])
-
-# mostramos los datos
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x[np.where(y == -1), 1]), np.squeeze(x[np.where(y == -1), 2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x[np.where(y == 1), 1]), np.squeeze(x[np.where(y == 1), 2]), 'o', color='blue', label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TRAINING)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x_test[np.where(y_test == -1), 1]), np.squeeze(x_test[np.where(y_test == -1), 2]), 'o', color='red',
-        label='4')
-ax.plot(np.squeeze(x_test[np.where(y_test == 1), 1]), np.squeeze(x_test[np.where(y_test == 1), 2]), 'o', color='blue',
-        label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TEST)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-# LINEAR REGRESSION FOR CLASSIFICATION
-
-# CODIGO DEL ESTUDIANTE
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-# POCKET ALGORITHM
-
-# CODIGO DEL ESTUDIANTE
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-# COTA SOBRE EL ERROR
-
-# CODIGO DEL ESTUDIANTE
