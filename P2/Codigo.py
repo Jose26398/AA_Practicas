@@ -50,12 +50,14 @@ print('\nEjercicio 1')
 x = simula_unif(50, 2, [-50, 50])
 # Mostramos por pantalla
 plt.scatter(x[:, 0], x[:, 1])
+plt.title("Ejercicio 1.1 - Apartado a")
 plt.show()
 
 # Generamos una muestra mediante la gaussiana de tamaño 50 con un sigma de [5, 7]
 x = simula_gaus(50, 2, np.array([5, 7]))
 # Mostramos por pantalla
 plt.scatter(x[:, 0], x[:, 1])
+plt.title("Ejercicio 1.1 - Apartado b")
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -101,6 +103,7 @@ lineaY = a * lineaX + b
 # Mostramos la gráfica por pantalla
 plt.scatter(x[:, 0], x[:, 1], c=y)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
+plt.title("Ejercicio 1.2 - Apartado a")
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -160,6 +163,7 @@ for n in range(len(indicesNegativos)):
 # Mostramos por pantalla las muestras con ruido
 plt.scatter(x[:, 0], x[:, 1], c=ruido)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
+plt.title("Ejercicio 1.2 - Apartado b")
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -278,14 +282,25 @@ def ajusta_PLA(datos, label, max_iter, vini):
 
 # Añadimos una columna de 1 al principio
 x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
-# Generación del vector de ceros
-w_0 = np.zeros(x.shape[1])
 
-# Ejecutamos el algoritmo PLA
-w, iter = ajusta_PLA(x, y, 1000, w_0)
+# Ejecutamos el algoritmo PLA con el vector de ceros
+w, iter = ajusta_PLA(x, y, 1000, np.zeros(x.shape[1]))
 
 # Imprimimos el resultado (Número de iteraciones)
 print('(Array de ceros) Valor de las iteraciones necesario para converger: ', iter)
+
+# Extra
+# Simplemente muestro la gráfica con los puntos y la recta que divide los datos
+# utilizando el algoritmo del Perceptron y el vector de ceros
+PLA_w = np.copy(w)
+PLA_x = np.linspace(-50, 50, y.size)
+PLA_y = (-PLA_w[0] - PLA_w[1]*PLA_x) / PLA_w[2]
+
+# Mostramos la gráfica por pantalla
+plt.scatter(x[:,1], x[:,2], c=y)
+plt.plot(PLA_x, PLA_y, 'r-', linewidth=2)
+plt.title("Ejercicio 2.1 - Apartado a")
+plt.show()
 
 
 # Para hacerlo con aleatorios hacemos lo siguiente:
@@ -301,17 +316,19 @@ for i in range(0, 10):
 # Hacemos la media y la imprimimos por pantalla
 print('(Array aleatorio) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
+
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
 # Ahora con los datos del ejercicio 1.2.b
 
-# Ejecutamos el algoritmo PLA con ruido
-w, iter = ajusta_PLA(x, ruido, 1000, w_0)
+# Ejecutamos el algoritmo PLA con ruido y el vector de ceros
+w, iter = ajusta_PLA(x, ruido, 1000, np.zeros(x.shape[1]))
 
 # Imprimimos el resultado (Número de iteraciones)
 print('(Array de ceros) Valor de las iteraciones necesario para converger: ', iter)
+
 
 # Para hacerlo con aleatorios hacemos lo siguiente:
 iterations = []
@@ -404,7 +421,7 @@ for i in range(x_train.shape[0]):
 y_train = np.array(y_train)
 
 
-# Ejercicio extra
+# Extra
 # Simplemente muestro la gráfica con los puntos y la recta que divide los datos
 # utilizando el gradiente descendente estocástico con regresión logística
 sgdLR_w = sgdLR(x_train, y_train, np.zeros((3,1)), 0.01)
@@ -414,6 +431,7 @@ sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 # Mostramos la gráfica por pantalla
 plt.scatter(x_train[:,1], x_train[:,2], c=y_train)
 plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
+plt.title("Ejercicio 2.2 - Apartado a")
 plt.show()
 
 
@@ -437,7 +455,18 @@ y_test = np.array(y_test)
 print("Ein: ", estimarError(x_train, y_train, sgdLR_w))
 print("Eout: ", estimarError(x_test, y_test, sgdLR_w))
 
+# Extra
+# Simplemente muestro la gráfica con los puntos y la recta que divide los datos
+# utilizando el gradiente descendente estocástico con regresión logística
+sgdLR_w = sgdLR(x_test, y_test, np.zeros((3,1)), 0.01)
+sgdLR_x = np.linspace(0, 2, y_test.size)
+sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 
+# Mostramos la gráfica por pantalla
+plt.scatter(x_test[:,1], x_test[:,2], c=y_test)
+plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
+plt.title("Ejercicio 2.2 - Apartado b")
+plt.show()
 
 ###############################################################################
 ###############################################################################
