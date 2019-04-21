@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 # Fijamos la semilla
 np.random.seed(1)
 
+print('\n\n\nEJERCICIO SOBRE LA COMPLEJIDAD DE H Y EL RUIDO')
+
 
 def simula_unif(N, dim, rango):
     return np.random.uniform(rango[0], rango[1], (N, dim))
@@ -42,15 +44,23 @@ def simula_recta(intervalo):
 
 # EJERCICIO 1.1: Dibujar una gráfica con la nube de puntos de salida correspondiente
 
+print('\nEjercicio 1')
+
+# Generamos una muestra de números aleatorios de tamaño 50 en el rango (-50, 50)
 x = simula_unif(50, 2, [-50, 50])
+# Añadimos una columna de 1 al principio
+x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
+# Mostramos por pantalla
 plt.scatter(x[:, 0], x[:, 1])
 plt.show()
 
+# Generamos una muestra mediante la gaussiana de tamaño 50 con un sigma de [5, 7]
 x = simula_gaus(50, 2, np.array([5, 7]))
+# Mostramos por pantalla
 plt.scatter(x[:, 0], x[:, 1])
 plt.show()
 
-#input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
@@ -59,6 +69,8 @@ plt.show()
 
 
 # EJERCICIO 1.2: Dibujar una gráfica con la nube de puntos de salida correspondiente
+
+print('\nEjercicio 2')
 
 # La funcion np.sign(0) da 0, lo que nos puede dar problemas
 def signo(x):
@@ -71,68 +83,91 @@ def f(x, y, a, b):
     return signo(y - a * x - b)
 
 
+# Generamos otra muestra de puntos 2D
 x = simula_unif(50, 2, [-50, 50])
+# Añadimos una columna de 1 al principio
+x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 y = []
 
+# Asignamos etiquetas a las muestras generadas anteriormenteutilizando
+# las funciones simula_recta(), f() y signo() proporcionadas por el profesor
 a, b = simula_recta([-50, 50])
 for i in range(x.shape[0]):
-    y.append(f(x[i, 0], x[i, 1], a, b))
+    y.append(f(x[i, 1], x[i, 2], a, b))
 y = np.array(y)
 
-
+# Ahora generamos la línea que divide los datos
 lineaX = np.linspace(-50, 50, y.size)
+# Usamos la funcion f(x,y)=y-ax-b, que es la distancia de cada
+# punto hasta la recta
 lineaY = a * lineaX + b
 
-# Mostramos la gráfica por pantalla y el error
-plt.scatter(x[:, 0], x[:, 1], c=y)
+# Mostramos la gráfica por pantalla
+plt.scatter(x[:, 1], x[:, 2], c=y)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
-#input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
 
 # 1.2.b. Dibujar una gráfica donde los puntos muestren el resultado de su etiqueta, junto con la recta usada para ello
 # Array con 10% de indices aleatorios para introducir ruido
 
+# Inicializamos dos listas vacías para los indices positivos y negativos
 indicesPositivos = []
 indicesNegativos = []
 
+# Le metemos los valores correspondientes del array y de etiquetas
 for i in enumerate(y):
     if y[i[1]] == 1:
         indicesPositivos.append(i[0])
     else:
         indicesNegativos.append(i[0])
 
+# Los convertimos en np.arrays
 indicesPositivos = np.array(indicesPositivos)
 indicesNegativos = np.array(indicesNegativos)
 
+# Sacamos aleatoriamente un 10% de índices positivos y otro 10% de índices negativos
 indexP = np.random.choice(int(indicesPositivos.size), size=int((indicesPositivos.size)/10), replace=False)
 indexN = np.random.choice(int(indicesNegativos.size), size=int((indicesNegativos.size)/10), replace=False)
 
+# Los volvemos a meter en listas
 indicesPositivos = indicesPositivos.tolist()
 indicesNegativos = indicesNegativos.tolist()
 
-# Cambiamos los 1 por -1 y viceversa
+# Intercambiamos el 10% de índices positivos sacados anteriormente por
+# el otro 10% de índices negativos de la siguiente forma
+
 for j in range(len(indicesPositivos)):
     if np.isin(j,indexP):
+        # Introducimos el positivo en la lista de negativos
         indicesNegativos.append(indicesPositivos[j])
+        # Borramos el positivo cambiado
         del indicesPositivos[j]
+
 for k in range(len(indicesNegativos)):
     if np.isin(k, indexN):
+        # Introducimos el negativo en la lista de positivos
         indicesPositivos.append(indicesNegativos[k])
+        # Borramos el negativo cambiado
         del indicesNegativos[k]
 
-
+# Los unimos todos en un nuevo array de etiquetas llamado ruido
 ruido = np.zeros(y.size, np.int64)
 for m in range(len(indicesPositivos)):
     ruido[indicesPositivos[m]] = 1
 for n in range(len(indicesNegativos)):
     ruido[indicesNegativos[n]] = -1
 
-plt.scatter(x[:, 0], x[:, 1], c=ruido)
+# Mostramos por pantalla las muestras con ruido
+plt.scatter(x[:, 1], x[:, 2], c=ruido)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
-##input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 ###############################################################################
@@ -178,6 +213,7 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
     plt.show()
 
 
+# Simplemente transformamos a código las funciones del enunciado
 def f1(grid):
     return (grid[:,0]-10)**2+(grid[:,1]-20)**2-400
 
@@ -190,6 +226,7 @@ def f3(grid):
 def f4(grid):
     return grid[:,1]-20*grid[:,0]**2-5*grid[:,0]+3
 
+# Se las pasamos como parámetro a la funcion plot_datos_cuad() del profesor
 plot_datos_cuad(x, ruido, f1)
 plot_datos_cuad(x, ruido, f2)
 plot_datos_cuad(x, ruido, f3)
@@ -199,53 +236,68 @@ plot_datos_cuad(x, ruido, f4)
 input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 
 
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
+
+print('\n\n\nMODELOS LINEALES')
+
 
 # EJERCICIO 2.1: ALGORITMO PERCEPTRON
 
+# Implementacion de la función que calcula el hiperplano solución
 def ajusta_PLA(datos, label, max_iter, vini):
-    w = np.array(vini)
-    iter = 0
-    converge = False
+    w = np.array(vini)  # Copiamos en w el punto inicial
+    iter = 0            # Creamos una variable para las iteraciones
+    converge = False    # Booleano para detener la ejecución cuando converja
+
+    # Comienzo del bucle
     while not converge:
-        converge = True
-        iter += 1
+        converge = True # Ponemos en True
+        iter += 1       # Aumentamos el número de iteraciones
+
+        # Recorremos todas las filas de datos (todos los puntos)
         for i in range(datos.shape[0]):
+            # Realizamos el producto puntual de wT*xi
             prod = np.dot(w, datos[i])
 
+            # Comprobamos que el signo del producto sea difeerente al de la etiqueta
             if (prod >= 0 and label[i] < 0) or (prod < 0 and label[i] > 0):
-                w += label[i]*datos[i]
-                converge = False
+                w += label[i]*datos[i]  # Si cumple la condición, actualizamos w
+                converge = False        # y seleccionamos que no converge
 
+        # Corta el bucle en caso de que llegue a las iteraciones máximas
         if iter >= max_iter:
             break
 
     return w, iter
 
 
-x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
+# Generación del vector de ceros
 w_0 = np.zeros(x.shape[1])
 
-# Random initializations
+# Ejecutamos el algoritmo PLA
+w, iter = ajusta_PLA(x, y, 1000, w_0)
+
+# Imprimimos el resultado (Número de iteraciones)
+print('(Array de ceros) Valor de las iteraciones necesario para converger: ', iter)
+
+
+# Para hacerlo con aleatorios hacemos lo siguiente:
 iterations = []
 for i in range(0, 10):
-    w, iter = ajusta_PLA(x, y, 1000, w_0)
-    iterations.append(iter)
-
-print('(Array de ceros) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
-
-
-iterations = []
-for i in range(0, 10):
+    # Generamos un nuevo vector aleatorio para cada iteración
     w_random = np.random.uniform(low=-1, high=1, size=3)
+    # Ejecutamos el algoritmo PLA
     w, iter = ajusta_PLA(x, y, 1000, w_random)
+    # Lo metemos en el array
     iterations.append(iter)
 
+# Hacemos la media y la imprimimos por pantalla
 print('(Array aleatorio) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
-##input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -312,38 +364,53 @@ def sigmoid_clasifier(x, y, w):
 
 
 def estimar_Eout(x, y, w):
-    Eout = 0
-    for xn, yn in zip(x,y):
-        xn = xn.reshape(1, 3)
-        z = yn*w.T*xn
-        Eout += np.log(1 + np.exp(-(z)))
-    return -(Eout/y.shape[0])
+    y = y.reshape(-1,1)
+    w = w.reshape(-1,1)
+
+    z = (x.dot(w))
+    Eout = np.log(1 + np.exp(-(y*z)))
+
+    return np.mean(Eout, axis=0)
 
 
+a, b = simula_recta([0, 2])
 
-sgdLR_w = sgdLR(x, y, np.zeros((3,1)), 0.01)
-sgdLR_x = np.linspace(-50, 50, y.size)
+x_train = simula_unif(100, 2, [0, 2])
+x_train = np.c_[np.ones((x_train.shape[0], 1), np.float64), x_train]
+
+y_train = []
+for i in range(x_train.shape[0]):
+    y_train.append(f(x_train[i, 1], x_train[i, 2], a, b))
+y_train = np.array(y_train)
+
+sgdLR_w = sgdLR(x_train, y_train, np.zeros((3,1)), 0.01)
+sgdLR_x = np.linspace(0, 2, y_train.size)
 sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 
+
+
 # Mostramos la gráfica por pantalla y el error
-plt.scatter(x[:,1], x[:,2], c=y)
+plt.scatter(x_train[:,1], x_train[:,2], c=y_train)
 plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
 plt.show()
+
+
 
 #input("\n--- Pulsar tecla para continuar ---\n")
 
 # Usar la muestra de datos etiquetada para encontrar nuestra solución g y estimar Eout
 # usando para ello un número suficientemente grande de nuevas muestras (>999).
 
-
-x_test = simula_unif(1000, 2, [-50, 50])
+x_test = simula_unif(1000, 2, [0, 2])
 x_test = np.c_[np.ones((x_test.shape[0], 1), np.float64), x_test]
 
 y_test = []
 for i in range(x_test.shape[0]):
-    y_test.append(f(x_test[i, 0], x_test[i, 1], a, b))
+    y_test.append(f(x_test[i, 1], x_test[i, 2], a, b))
 y_test = np.array(y_test)
 
+print("Ein: ", estimar_Eout(x_train, y_train, sgdLR_w))
+print("W: ", sgdLR_w)
 print("Eout: ", estimar_Eout(x_test, y_test, sgdLR_w))
 
 
