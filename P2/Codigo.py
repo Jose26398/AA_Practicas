@@ -48,8 +48,6 @@ print('\nEjercicio 1')
 
 # Generamos una muestra de números aleatorios de tamaño 50 en el rango (-50, 50)
 x = simula_unif(50, 2, [-50, 50])
-# Añadimos una columna de 1 al principio
-x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 # Mostramos por pantalla
 plt.scatter(x[:, 0], x[:, 1])
 plt.show()
@@ -85,15 +83,13 @@ def f(x, y, a, b):
 
 # Generamos otra muestra de puntos 2D
 x = simula_unif(50, 2, [-50, 50])
-# Añadimos una columna de 1 al principio
-x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 y = []
 
 # Asignamos etiquetas a las muestras generadas anteriormenteutilizando
 # las funciones simula_recta(), f() y signo() proporcionadas por el profesor
 a, b = simula_recta([-50, 50])
 for i in range(x.shape[0]):
-    y.append(f(x[i, 1], x[i, 2], a, b))
+    y.append(f(x[i, 0], x[i, 1], a, b))
 y = np.array(y)
 
 # Ahora generamos la línea que divide los datos
@@ -103,7 +99,7 @@ lineaX = np.linspace(-50, 50, y.size)
 lineaY = a * lineaX + b
 
 # Mostramos la gráfica por pantalla
-plt.scatter(x[:, 1], x[:, 2], c=y)
+plt.scatter(x[:, 0], x[:, 1], c=y)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
@@ -162,12 +158,11 @@ for n in range(len(indicesNegativos)):
     ruido[indicesNegativos[n]] = -1
 
 # Mostramos por pantalla las muestras con ruido
-plt.scatter(x[:, 1], x[:, 2], c=ruido)
+plt.scatter(x[:, 0], x[:, 1], c=ruido)
 plt.plot(lineaX, lineaY, 'r-', linewidth=2)
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
-
 
 
 ###############################################################################
@@ -176,6 +171,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 1.3: Supongamos ahora que las siguientes funciones definen la frontera
 # de clasificación de los puntos de la muestra en lugar de una recta
+
+print('\nEjercicio 3')
 
 def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y axis'):
     # Preparar datos
@@ -237,16 +234,21 @@ input("\n--- Pulsar tecla para continuar al ejercicio 2 ---\n")
 
 
 
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
+
+
 
 print('\n\n\nMODELOS LINEALES')
 
 
 # EJERCICIO 2.1: ALGORITMO PERCEPTRON
 
-# Implementacion de la función que calcula el hiperplano solución
+print('\nEjercicio 1')
+
+# Implementacion de la función Perceptrón que calcula el hiperplano solución
 def ajusta_PLA(datos, label, max_iter, vini):
     w = np.array(vini)  # Copiamos en w el punto inicial
     iter = 0            # Creamos una variable para las iteraciones
@@ -274,6 +276,8 @@ def ajusta_PLA(datos, label, max_iter, vini):
     return w, iter
 
 
+# Añadimos una columna de 1 al principio
+x = np.c_[np.ones((x.shape[0], 1), np.float64), x]
 # Generación del vector de ceros
 w_0 = np.zeros(x.shape[1])
 
@@ -303,118 +307,136 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # Ahora con los datos del ejercicio 1.2.b
 
-# Random initializations
+# Ejecutamos el algoritmo PLA con ruido
+w, iter = ajusta_PLA(x, ruido, 1000, w_0)
+
+# Imprimimos el resultado (Número de iteraciones)
+print('(Array de ceros) Valor de las iteraciones necesario para converger: ', iter)
+
+# Para hacerlo con aleatorios hacemos lo siguiente:
 iterations = []
 for i in range(0, 10):
-    w, iter = ajusta_PLA(x, ruido, 1000, w_0)
-    iterations.append(iter)
-
-print('(Array de ceros) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
-
-
-iterations = []
-for i in range(0, 10):
+    # Generamos un nuevo vector aleatorio para cada iteración
     w_random = np.random.uniform(low=-1, high=1, size=3)
+    # Ejecutamos el algoritmo PLA con ruido
     w, iter = ajusta_PLA(x, ruido, 1000, w_random)
+    # Lo metemos en el array
     iterations.append(iter)
 
 print('(Array aleatorio) Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
 
-##input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
 ###############################################################################
 ###############################################################################
 
-# EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
+# EJERCICIO 2.2: REGRESIÓN LOGÍSTICA
+
+print('\nEjercicio 2')
+
+# Implementación del algoritmo de regresión logística utilizando el gradiente descendente estocástico
 def sgdLR(x, y, initial_point, eta):
-    w = np.copy(initial_point)
+    w = np.copy(initial_point)  # Copiamos en w el punto inicial
+    w = w.reshape(1,-1)         # Le asignamos una forma determinada al w
 
     # Calculamos el gradiente descendente
     while True:
-        # Obtenemos un vector aleatorio de índices de tamaño 64
+        # Aplicamos una permutación aleatoria del tamaño de la muestra
         index = np.random.permutation(x.shape[0])
         # Asignamos los valores de los índices de 'x' e 'y' en los minibatches
         minibatch_x = x[index,:]
         minibatch_y = y[index]
 
+        # Copiamos el w antes de modificarlo para comprobar posteriormente si parar
         w_ant = np.copy(w)
 
+        # Calculamos el gradiente descendente
         for xn, yn in zip(minibatch_x, minibatch_y):
-            gradient = sigmoid_clasifier(xn, yn, w)
-            w -= eta * gradient
+            gradiente = clasificadorRL(xn, yn, w)
+            w -= eta * gradiente
 
+        # Si la distancia euclídea entre el w_ant y este es menor que 0.01 paramos el bucle
         if np.linalg.norm(w_ant - w) < 0.01:
             break
 
     return w.reshape(-1,)
 
 
-def sigmoid_clasifier(x, y, w):
-    x = x.reshape(1, 3)
-    z = np.dot(x, w)
-    h = 1 / (1 + np.exp(-z))
-    if h >= 0.5:
-        return np.dot(x.T, 1)
-    else:
-        return np.dot(x.T, -1)
+# Función para la clasificación logística
+def clasificadorRL(x, y, w):
+    # Numerador de la fracción
+    h = y*x
+    # Calculo del valor del exponente de e
+    z = y*w.dot(x.reshape(-1,))
+    # Devolvemos el clasificador de la regresión logística
+    return - (h) / (1 + np.exp(z))
 
 
-def estimar_Eout(x, y, w):
-    y = y.reshape(-1,1)
-    w = w.reshape(-1,1)
+# Función para estimar el error
+def estimarError(x, y, w):
+    y = y.reshape(-1,1) # Le asignamos una forma determinada al y
+    w = w.reshape(-1,1) # Le asignamos una forma determinada al w
 
+    # Realizamos el producto puntual de wT·x
     z = (x.dot(w))
+    # Calculamos el ERM de la regresión logística
     Eout = np.log(1 + np.exp(-(y*z)))
-
+    # Devolvemos la media de este valor
     return np.mean(Eout, axis=0)
 
 
+# Generamos parámetros a y b del cuadrado X = [0,2]x[0,2]
 a, b = simula_recta([0, 2])
 
+# Generamos muestra de entrenamiento de tamaño 100 en el cuadrado X = [0,2]x[0,2]
 x_train = simula_unif(100, 2, [0, 2])
 x_train = np.c_[np.ones((x_train.shape[0], 1), np.float64), x_train]
 
+# Asignamos etiquetas a las muestras generadas anteriormenteutilizando
+# las funciones simula_recta(), f() y signo() proporcionadas por el profesor
 y_train = []
 for i in range(x_train.shape[0]):
     y_train.append(f(x_train[i, 1], x_train[i, 2], a, b))
 y_train = np.array(y_train)
 
+
+# Ejercicio extra
+# Simplemente muestro la gráfica con los puntos y la recta que divide los datos
+# utilizando el gradiente descendente estocástico con regresión logística
 sgdLR_w = sgdLR(x_train, y_train, np.zeros((3,1)), 0.01)
 sgdLR_x = np.linspace(0, 2, y_train.size)
 sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 
-
-
-# Mostramos la gráfica por pantalla y el error
+# Mostramos la gráfica por pantalla
 plt.scatter(x_train[:,1], x_train[:,2], c=y_train)
 plt.plot(sgdLR_x, sgdLR_y, 'r-', linewidth=2)
 plt.show()
 
 
-
-#input("\n--- Pulsar tecla para continuar ---\n")
+input("\n--- Pulsar tecla para continuar ---\n")
 
 # Usar la muestra de datos etiquetada para encontrar nuestra solución g y estimar Eout
 # usando para ello un número suficientemente grande de nuevas muestras (>999).
 
+# Generamos muestra de test de tamaño 1000 en el cuadrado X = [0,2]x[0,2]
 x_test = simula_unif(1000, 2, [0, 2])
 x_test = np.c_[np.ones((x_test.shape[0], 1), np.float64), x_test]
 
+# Asignamos etiquetas a las muestras generadas anteriormenteutilizando
+# las funciones simula_recta(), f() y signo() proporcionadas por el profesor
 y_test = []
 for i in range(x_test.shape[0]):
     y_test.append(f(x_test[i, 1], x_test[i, 2], a, b))
 y_test = np.array(y_test)
 
-print("Ein: ", estimar_Eout(x_train, y_train, sgdLR_w))
-print("W: ", sgdLR_w)
-print("Eout: ", estimar_Eout(x_test, y_test, sgdLR_w))
+# Imprimimos los errores Ein y Eout
+print("Ein: ", estimarError(x_train, y_train, sgdLR_w))
+print("Eout: ", estimarError(x_test, y_test, sgdLR_w))
 
-
-#input("\n--- Pulsar tecla para continuar ---\n")
 
 
 ###############################################################################
