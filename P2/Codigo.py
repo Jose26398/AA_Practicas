@@ -138,7 +138,6 @@ indicesNegativos = indicesNegativos.tolist()
 
 # Intercambiamos el 10% de índices positivos sacados anteriormente por
 # el otro 10% de índices negativos de la siguiente forma
-
 for j in range(len(indicesPositivos)):
     if np.isin(j,indexP):
         # Introducimos el positivo en la lista de negativos
@@ -458,7 +457,6 @@ print("Eout: ", estimarError(x_test, y_test, sgdLR_w))
 # Extra
 # Simplemente muestro la gráfica con los puntos y la recta que divide los datos
 # utilizando el gradiente descendente estocástico con regresión logística
-sgdLR_w = sgdLR(x_test, y_test, np.zeros((3,1)), 0.01)
 sgdLR_x = np.linspace(0, 2, y_test.size)
 sgdLR_y = (-sgdLR_w[0] - sgdLR_w[1]*sgdLR_x) / sgdLR_w[2]
 
