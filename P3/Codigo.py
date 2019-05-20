@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MaxAbsScaler, normalize
 from sklearn import svm, metrics, linear_model, neighbors
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 
@@ -60,6 +60,15 @@ testY_optdigits = np.array(df)[:,-1:]
 
 
 # ----------------------------------------------------------------------------------------- #
+def analisisClasificacion(expected, predicted):
+    print("Classification report:\n%s\n"
+          % (metrics.classification_report(expected, predicted)))
+
+    print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
+
+
+
+# ----------------------------------------------------------------------------------------- #
 def Perceptron(penality, max_iter, tol):
     print('\n\n\nPERCEPTRON')
     # Creamos el clasificador y lo asignamos a una variable
@@ -73,15 +82,7 @@ def Perceptron(penality, max_iter, tol):
     expected = testY_optdigits
     predicted = classifier.predict(testX_optdigits)
 
-    print("Classification report for classifier %s:\n%s\n"
-          % (classifier, metrics.classification_report(expected, predicted)))
-    print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
-
-    print("\nMean Absolut Error: %s"
-          % (metrics.mean_absolute_error(expected, predicted)))
-
-    print("Mean Squared Error: %s"
-          % (metrics.mean_squared_error(expected, predicted)))
+    analisisClasificacion(expected, predicted)
 
 Perceptron('l2', 15000, 1e-4)
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -89,7 +90,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 # ----------------------------------------------------------------------------------------- #
-def RegrsionLogistica(penality, max_iter):
+def RegresionLogistica(penality, max_iter):
     print('\n\n\nREGRESION LOGISTICA')
     # Creamos el clasificador y lo asignamos a una variable
     classifier = linear_model.LogisticRegression(penalty=penality, max_iter=max_iter, solver='liblinear', multi_class='ovr')
@@ -102,17 +103,10 @@ def RegrsionLogistica(penality, max_iter):
     expected = testY_optdigits
     predicted = classifier.predict(testX_optdigits)
 
-    print("Classification report for classifier %s:\n%s\n"
-          % (classifier, metrics.classification_report(expected, predicted)))
-    print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
+    # Funcion que muestra por pantalla los resultados
+    analisisClasificacion(expected, predicted)
 
-    print("\nMean Absolut Error: %s"
-          % (metrics.mean_absolute_error(expected, predicted)))
-
-    print("Mean Squared Error: %s"
-          % (metrics.mean_squared_error(expected, predicted)))
-
-RegrsionLogistica('l2', 15000)
+RegresionLogistica('l2', 15000)
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
@@ -131,15 +125,8 @@ def SGDClassifier(penality, max_iter, alpha, tol):
     expected = testY_optdigits
     predicted = classifier.predict(testX_optdigits)
 
-    print("Classification report for classifier %s:\n%s\n"
-          % (classifier, metrics.classification_report(expected, predicted)))
-    print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
-
-    print("\nMean Absolut Error: %s"
-          % (metrics.mean_absolute_error(expected, predicted)))
-
-    print("Mean Squared Error: %s"
-          % (metrics.mean_squared_error(expected, predicted)))
+    # Funcion que muestra por pantalla los resultados
+    analisisClasificacion(expected, predicted)
 
 SGDClassifier('l2', 15000, 0.001, 1e-4)
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -160,45 +147,12 @@ def LinearSVC(penality, C, max_iter, tol):
     expected = testY_optdigits
     predicted = classifier.predict(testX_optdigits)
 
-    print("Classification report for classifier %s:\n%s\n"
-          % (classifier, metrics.classification_report(expected, predicted)))
-    print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
-
-    print("\nMean Absolut Error: %s"
-          % (metrics.mean_absolute_error(expected, predicted)))
-
-    print("Mean Squared Error: %s"
-          % (metrics.mean_squared_error(expected, predicted)))
+    # Funcion que muestra por pantalla los resultados
+    analisisClasificacion(expected, predicted)
 
 LinearSVC('l2', 1.0, 15000, 1e-4)
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
-
-# ----------------------------------------------------------------------------------------- #
-print('\n\n\nkNN VECINO MAS CERCANO')
-# Creamos el clasificador y lo asignamos a una variable
-classifier = neighbors.KNeighborsClassifier(n_neighbors=1)
-
-# Entrenamos nuestro clasificador con los datos de entrenamiento
-classifier.fit(trainX_optdigits, trainY_optdigits.ravel())
-
-# Creamos dos variables: valor esperado y el que predecimos
-# gracias al vector de entrenamiento
-expected = testY_optdigits
-predicted = classifier.predict(testX_optdigits)
-
-print("Classification report for classifier %s:\n%s\n"
-      % (classifier, metrics.classification_report(expected, predicted)))
-print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
-
-print("\nMean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
-
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
-
-input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -237,82 +191,88 @@ X_airfoil = normalize(X_airfoil)
 
 
 # ----------------------------------------------------------------------------------------- #
-print('\n\n\nREGRESION LINEAL')
-# Create a classifier: a support vector classifier
-regressor = linear_model.LinearRegression()
+def analisisRegresion(expected, predicted):
+    print("Mean Absolut Error: %s"
+          % (metrics.mean_absolute_error(expected, predicted)))
 
-# We learn the digits on the first half of the digits
-regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
+    print("Mean Squared Error: %s"
+          % (metrics.mean_squared_error(expected, predicted)))
 
-# Now predict the value of the digit on the second half:
-expected = testY_airfoil
-predicted = regressor.predict(testX_airfoil)
+    linea = np.linspace(100, 150, predicted.shape[0])
 
-print("Mean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
-
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
-
-
-# ----------------------------------------------------------------------------------------- #
-print('\n\n\nGRADIENTE DESCENDENTE ESTOCASTICO')
-# Create a classifier: a support vector classifier
-regressor = linear_model.SGDRegressor(penalty='l2', max_iter=15000, alpha=0.001, tol=1e-3)
-
-# We learn the digits on the first half of the digits
-regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
-
-# Now predict the value of the digit on the second half:
-expected = testY_airfoil
-predicted = regressor.predict(testX_airfoil)
-
-print("Mean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
-
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
+    # Mostramos la gráfica por pantalla
+    plt.scatter(expected, predicted)
+    plt.plot(linea, linea, 'r-', linewidth=2)
+    plt.xlabel('Predicted (dB)')
+    plt.ylabel('Expected (dB)')
+    plt.show()
 
 
 
 # ----------------------------------------------------------------------------------------- #
-print('\n\n\nSUPPORT VECTOR MACHINE (SVM)')
-# Create a classifier: a support vector classifier
-regressor = svm.LinearSVR(C=1.0, max_iter=15000, epsilon=0)
+def RegresionLineal():
+    print('\n\n\nREGRESION LINEAL')
+    # Creamos el regresor y lo asignamos a una variable
+    regressor = linear_model.LinearRegression()
 
-# We learn the digits on the first half of the digits
-regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
+    # Lo entrenamos con los datos de entrenamiento
+    regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
 
-# Now predict the value of the digit on the second half:
-expected = testY_airfoil
-predicted = regressor.predict(testX_airfoil)
+    # Creamos dos variables: valor esperado y el que predecimos
+    # gracias al vector de entrenamiento
+    expected = testY_airfoil
+    predicted = regressor.predict(testX_airfoil)
 
-print("Mean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
+    # Funcion que muestra por pantalla los resultados
+    analisisRegresion(expected, predicted)
 
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
+RegresionLineal()
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
 # ----------------------------------------------------------------------------------------- #
-print('\n\n\nkNN VECINO MAS CERCANO')
-# Create a classifier: a support vector classifier
-regressor = neighbors.KNeighborsRegressor(n_neighbors=1)
+def SGDRegressor(penality, max_iter, alpha, tol):
+    print('\n\n\nGRADIENTE DESCENDENTE ESTOCASTICO')
+    # Creamos el regresor y lo asignamos a una variable
+    regressor = linear_model.SGDRegressor(penalty=penality, max_iter=max_iter, alpha=alpha, tol=tol)
 
-# We learn the digits on the first half of the digits
-regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
+    # Lo entrenamos con los datos de entrenamiento
+    regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
 
-# Now predict the value of the digit on the second half:
-expected = testY_airfoil
-predicted = regressor.predict(testX_airfoil)
+    # Creamos dos variables: valor esperado y el que predecimos
+    # gracias al vector de entrenamiento
+    expected = testY_airfoil
+    predicted = regressor.predict(testX_airfoil)
+
+    # Funcion que muestra por pantalla los resultados
+    analisisRegresion(expected, predicted)
+
+SGDRegressor('l2', 15000, 0.001, 1e-4)
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
-print("Mean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
 
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
+# ----------------------------------------------------------------------------------------- #
+def LinearSVR(C, max_iter, tol):
+    print('\n\n\nSUPPORT VECTOR MACHINE (SVR)')
+    # Creamos el regresor y lo asignamos a una variable
+    regressor = svm.LinearSVR(C=C, max_iter=max_iter, tol=tol)
+
+    # Lo entrenamos con los datos de entrenamiento
+    regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
+
+    # Creamos dos variables: valor esperado y el que predecimos
+    # gracias al vector de entrenamiento
+    expected = testY_airfoil
+    predicted = regressor.predict(testX_airfoil)
+
+    # Funcion que muestra por pantalla los resultados
+    analisisRegresion(expected, predicted)
+
+LinearSVR(1.0, 15000, 1e-4)
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 
@@ -322,14 +282,19 @@ print("Mean Squared Error: %s"
 ########################### MODIFICACIONES DE METODOS Y PARAMETROS ##########################
 #############################################################################################
 # ----------------------------------------------------------------------------------------- #
+SGDClassifier('l1', 15000, 0.001, 1e-4)
+SGDClassifier('l2', 15000, 0.0001, 1e-5)
+
+LinearSVR(5.0, 15000, 1e-5)
+LinearSVR(0.1, 1000, 1e-3)
+
 
 
 
 # ----------------------------------------------------------------------------------------- #
-print('\n\n\nSUPPORT VECTOR MACHINE (SVM)')
+print('\n\n\nkNN VECINO MAS CERCANO')
 # Creamos el clasificador y lo asignamos a una variable
-classifier = svm.LinearSVC(penalty='l2', C=1.0, max_iter=15000, tol=1e-4)
-results = cross_val_score(regressor, X_airfoil, y_airfoil.ravel(), cv=10)
+classifier = neighbors.KNeighborsClassifier()
 
 # Entrenamos nuestro clasificador con los datos de entrenamiento
 classifier.fit(trainX_optdigits, trainY_optdigits.ravel())
@@ -339,24 +304,31 @@ classifier.fit(trainX_optdigits, trainY_optdigits.ravel())
 expected = testY_optdigits
 predicted = classifier.predict(testX_optdigits)
 
-print("Classification report for classifier %s:\n%s\n"
-      % (classifier, metrics.classification_report(expected, predicted)))
-print("Confusion matrix:\n%s" % metrics.confusion_matrix(expected, predicted))
+# Funcion que muestra por pantalla los resultados
+analisisClasificacion(expected, predicted)
 
-print("\nMean Absolut Error: %s"
-      % (metrics.mean_absolute_error(expected, predicted)))
+input("\n--- Pulsar tecla para continuar ---\n")
 
-print("Mean Squared Error: %s"
-      % (metrics.mean_squared_error(expected, predicted)))
-
-print("\nMean: ", abs(results.mean()))
-print("Desviation: ", np.std(results))
 
 
 # ----------------------------------------------------------------------------------------- #
-LinearSVC('l2', 1.0, 15000, 1e-4)
-LinearSVC('l1', 1.0, 15000, 1e-4)
-LinearSVC('l2', 0.1, 15000, 1e-4)
-LinearSVC('l1', 0.1, 15000, 1e-4)
+print('\n\n\nkNN VECINO MAS CERCANO')
+# Creamos el regresor y lo asignamos a una variable
+regressor = neighbors.KNeighborsRegressor()
+
+# Lo entrenamos con los datos de entrenamiento
+regressor.fit(trainX_airfoil, trainY_airfoil.ravel())
+
+# Creamos dos variables: valor esperado y el que predecimos
+# gracias al vector de entrenamiento
+expected = testY_airfoil
+predicted = regressor.predict(testX_airfoil)
+
+# Funcion que muestra por pantalla los resultados
+analisisRegresion(expected, predicted)
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
 
 
